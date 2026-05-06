@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monitor Suhu & Kelembaban - ESP32</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.3.4/mqtt.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #1c2128;
+      --border: #30363d;
+      --blue: #388bfd;
+      --blue-dim: #1f3a5f;
+      --teal: #3fb950;
+      --teal-dim: #1a3a25;
+      --red: #f85149;
+      --red-dim: #3d1a18;
+      --yellow: #d29922;
+      --yellow-dim: #3a2a0a;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --text-faint: #484f58;
+      --mono: 'Space Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      min-height: 100vh;
+      padding: 20px 16px 40px;
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+  
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .header-icon {
+      width: 36px; height: 36px;
+      background: var(--blue-dim);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .header h1 { font-size: 15px; font-weight: 600; color: var(--text); }
+    .header p  { font-size: 11px; color: var(--text-muted); font-family: var(--mono); margin-top: 2px; }
+
+    .status-badge {
+      font-size: 11px;
+      font-family: var(--mono);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 700;
+      display: flex; align-items: center; gap: 6px;
+      border: 1px solid;
+    }
+    .status-badge::before {
+      content: '';
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .status-online    { color: var(--teal);  border-color: var(--teal);  background: var(--teal-dim); }
+    .status-online::before { background: var(--teal); box-shadow: 0 0 6px var(--teal); animation: pulse 2s infinite; }
+    .status-offline   { color: var(--red);   border-color: var(--red);   background: var(--red-dim); }
+    .status-offline::before { background: var(--red); }
+    .status-connecting{ color: var(--yellow);border-color: var(--yellow);background: var(--yellow-dim); }
+    .status-connecting::before { background: var(--yellow); animation: blink 1s infinite; }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+   
+    .warning-banner {
+      display: none;
+      background: var(--red-dim);
+      border: 1px solid var(--red);
+      border-radius: 10px;
+      padding: 12px 18px;
+      align-items: center;
+      gap: 12px;
+    }
+    .warning-banner.show { display: flex; animation: shake 0.4s ease; }
+    .warning-icon { font-size: 20px; flex-shrink: 0; }
+    .warning-text { font-size: 13px; color: var(--red); font-weight: 600; }
+    .warning-text span { font-family: var(--mono); }
+
+    @keyframes shake {
+      0%,100%{transform:translateX(0)}
+      20%{transform:translateX(-4px)}
+      40%{transform:translateX(4px)}
+      60%{transform:translateX(-3px)}
+      80%{transform:translateX(3px)}
+    }
+
+    
+    .sensor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .sensor-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 20px 16px;
+      transition: border-color 0.3s;
+    }
+    .sensor-card.hot { border-color: var(--red); background: var(--red-dim); }
+    .sensor-card .s-label {
+      font-size: 11px;
+      font-family: var(--mono);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+    .sensor-card .s-value {
+      font-size: 54px;
+      font-family: var(--mono);
+      font-weight: 700;
+      color: var(--blue);
+      line-height: 1;
+      transition: color 0.3s;
+    }
+    .sensor-card.hot .s-value { color: var(--red); }
+    .sensor-card .s-unit { font-size: 20px; font-weight: 400; }
+    .sensor-card .s-time {
+      font-size: 10px;
+      color: var(--text-faint);
+      font-family: var(--mono);
+      margin-top: 10px;
+    }
+
+   
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px 14px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .card-title {
+      font-size: 12px;
+      font-family: var(--mono);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .card-badge {
+      font-size: 10px;
+      font-family: var(--mono);
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid;
+    }
+    .badge-blue  { color: var(--blue);  border-color: var(--blue-dim);  background: var(--blue-dim); }
+    .badge-teal  { color: var(--teal);  border-color: var(--teal-dim);  background: var(--teal-dim); }
+
+    
+    .table-wrap { overflow-x: auto; max-height: 260px; overflow-y: auto; }
+    .table-wrap::-webkit-scrollbar { width: 4px; }
+    .table-wrap::-webkit-scrollbar-track { background: transparent; }
+    .table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    thead th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 10px;
+      font-family: var(--mono);
+      font-weight: 700;
+      color: var(--text-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+    }
+    tbody tr { border-bottom: 1px solid #1c2128; transition: background 0.15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody td { padding: 9px 12px; color: var(--text-muted); font-family: var(--mono); font-size: 12px; }
+    tbody td:first-child { color: var(--text-faint); }
+    tbody td.hot { color: var(--red); }
+    tbody tr:hover { background: var(--surface2); }
+    tbody tr.warn-row td { background: rgba(248,81,73,0.06); }
+
+    .no-data { text-align: center; color: var(--text-faint); padding: 24px; font-size: 12px; font-family: var(--mono); }
+
+    .badge-hot {
+      display: inline-block;
+      font-size: 9px;
+      background: var(--red-dim);
+      color: var(--red);
+      border: 1px solid var(--red);
+      border-radius: 4px;
+      padding: 1px 5px;
+      margin-left: 5px;
+      vertical-align: middle;
+    }
+
+    
+    .relay-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .relay-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      transition: border-color 0.3s;
+    }
+    .relay-card.active {
+      border-color: var(--teal);
+      background: var(--teal-dim);
+    }
+    .relay-label {
+      font-size: 11px;
+      font-family: var(--mono);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .relay-indicator {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--text-faint);
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    .relay-card.active .relay-indicator {
+      background: var(--teal);
+      box-shadow: 0 0 8px var(--teal);
+    }
+    .relay-btn-group {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+    }
+    .relay-btn {
+      flex: 1;
+      padding: 6px 0;
+      border-radius: 6px;
+      border: 1px solid;
+      font-size: 11px;
+      font-family: var(--mono);
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .relay-btn:active { transform: scale(0.95); }
+    .btn-on {
+      background: var(--teal-dim);
+      border-color: var(--teal);
+      color: var(--teal);
+    }
+    .btn-on:hover { background: #235c30; }
+    .btn-off {
+      background: var(--red-dim);
+      border-color: var(--red);
+      color: var(--red);
+    }
+    .btn-off:hover { background: #5a2420; }
+
+    
+    @media (max-width: 520px) {
+      body { padding: 12px 10px 32px; }
+      .sensor-grid { grid-template-columns: 1fr; }
+      .sensor-card .s-value { font-size: 40px; }
+      .header h1 { font-size: 13px; }
+      .header p { font-size: 10px; }
+      .status-badge { font-size: 10px; padding: 3px 8px; }
+      .relay-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  
+  <div class="header">
+    <div class="header-left">
+      <div class="header-icon">🌡️</div>
+      <div>
+        <h1>Monitor Suhu & Kelembaban</h1>
+        <p>ESP32 · broker.hivemq.com</p>
+      </div>
+    </div>
+    <span class="status-badge status-connecting" id="statusBadge">Menghubungkan...</span>
+  </div>
+
+  
+  <div class="warning-banner" id="warningBanner">
+    <div class="warning-icon">⚠️</div>
+    <div class="warning-text">
+      PERINGATAN: Suhu tinggi terdeteksi — <span id="warningVal">--</span>°C melebihi batas 30°C!
+    </div>
+  </div>
+
+ 
+  <div class="sensor-grid">
+    <div class="sensor-card" id="cardSuhu">
+      <div class="s-label">🌡 Suhu</div>
+      <div class="s-value" id="suhuVal">--<span class="s-unit">°C</span></div>
+      <div class="s-time" id="suhuTime">Menunggu data...</div>
+    </div>
+    <div class="sensor-card" id="cardHumid">
+      <div class="s-label">💧 Kelembaban</div>
+      <div class="s-value" id="humVal" style="color:var(--teal)">--<span class="s-unit">%</span></div>
+      <div class="s-time" id="humTime">Menunggu data...</div>
+    </div>
+  </div>
+
+  
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">🔌 Kontrol Relay / LED</div>
+    </div>
+    <div class="relay-grid">
+      <div class="relay-card" id="relayCard0">
+        <div class="relay-label">Relay 1</div>
+        <div class="relay-indicator" id="relayInd0"></div>
+        <div class="relay-btn-group">
+          <button class="relay-btn btn-on"  onclick="relayOn(0)">ON</button>
+          <button class="relay-btn btn-off" onclick="relayOff(0)">OFF</button>
+        </div>
+      </div>
+      <div class="relay-card" id="relayCard1">
+        <div class="relay-label">Relay 2</div>
+        <div class="relay-indicator" id="relayInd1"></div>
+        <div class="relay-btn-group">
+          <button class="relay-btn btn-on"  onclick="relayOn(1)">ON</button>
+          <button class="relay-btn btn-off" onclick="relayOff(1)">OFF</button>
+        </div>
+      </div>
+      <div class="relay-card" id="relayCard2">
+        <div class="relay-label">Relay 3</div>
+        <div class="relay-indicator" id="relayInd2"></div>
+        <div class="relay-btn-group">
+          <button class="relay-btn btn-on"  onclick="relayOn(2)">ON</button>
+          <button class="relay-btn btn-off" onclick="relayOff(2)">OFF</button>
+        </div>
+      </div>
+      <div class="relay-card" id="relayCard3">
+        <div class="relay-label">Relay 4</div>
+        <div class="relay-indicator" id="relayInd3"></div>
+        <div class="relay-btn-group">
+          <button class="relay-btn btn-on"  onclick="relayOn(3)">ON</button>
+          <button class="relay-btn btn-off" onclick="relayOff(3)">OFF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+ 
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Grafik Suhu</div>
+      <div class="card-badge badge-blue">°C</div>
+    </div>
+    <canvas id="chartSuhu" height="110"></canvas>
+  </div>
+
+  
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Grafik Kelembaban</div>
+      <div class="card-badge badge-teal">%</div>
+    </div>
+    <canvas id="chartHumid" height="110"></canvas>
+  </div>
+
+  
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Riwayat Data</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Waktu</th>
+            <th>Suhu (°C)</th>
+            <th>Kelembaban (%)</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="4" class="no-data">Menunggu data dari ESP32...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const BROKER  = 'wss://broker.hivemq.com:8884/mqtt';
+  const TOPIC_S = 'smk/iot/sensorsuhu2';
+  const TOPIC_H = 'smk/iot/sensorkelembaban2';
+  const TOPIC_C = 'smk/iot/control2';
+  const MAX_DATA = 20;
+  const SUHU_THRESHOLD = 30;
+
+  const labels = [], dataSuhu = [], dataHumid = [];
+  let lastSuhu = '--', lastHumid = '--';
+  let gotSuhu = false, gotHumid = false;
+  let rowCount = 0;
+
+
+  const relayState = [false, false, false, false];
+
+ 
+  function relayOn(i) {
+    relayState[i] = true;
+    updateRelayUI(i);
+    client.publish(TOPIC_C, 'R' + (i + 1) + '_OFF');
+  }
+
+  function relayOff(i) {
+    relayState[i] = false;
+    updateRelayUI(i);
+    client.publish(TOPIC_C, 'R' + (i + 1) + '_ON');
+  }
+
+  function updateRelayUI(i) {
+    const card = document.getElementById('relayCard' + i);
+    if (relayState[i]) card.classList.add('active');
+    else card.classList.remove('active');
+  }
+
+  
+  function suhuColor(hot) {
+    return hot ? '#f85149' : '#388bfd';
+  }
+  function suhuBg(hot) {
+    return hot ? 'rgba(248,81,73,0.10)' : 'rgba(56,139,253,0.08)';
+  }
+
+  const ctxSuhu = document.getElementById('chartSuhu').getContext('2d');
+  const chartSuhu = new Chart(ctxSuhu, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Suhu (°C)',
+        data: dataSuhu,
+        borderColor: '#388bfd',
+        backgroundColor: 'rgba(56,139,253,0.08)',
+        tension: 0.4,
+        pointRadius: 3,
+        fill: true,
+        borderWidth: 2,
+        pointBackgroundColor: '#388bfd'
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 400 },
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          ticks: { font: { size: 9, family: 'Space Mono' }, color: '#484f58', maxRotation: 0 },
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          border: { color: '#30363d' }
+        },
+        y: {
+          ticks: { font: { size: 9, family: 'Space Mono' }, color: '#484f58' },
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          border: { color: '#30363d' }
+        }
+      }
+    }
+  });
+
+ 
+  const ctxHumid = document.getElementById('chartHumid').getContext('2d');
+  const chartHumid = new Chart(ctxHumid, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Kelembaban (%)',
+        data: dataHumid,
+        borderColor: '#3fb950',
+        backgroundColor: 'rgba(63,185,80,0.08)',
+        tension: 0.4,
+        pointRadius: 3,
+        fill: true,
+        borderWidth: 2,
+        pointBackgroundColor: '#3fb950'
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 400 },
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          ticks: { font: { size: 9, family: 'Space Mono' }, color: '#484f58', maxRotation: 0 },
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          border: { color: '#30363d' }
+        },
+        y: {
+          ticks: { font: { size: 9, family: 'Space Mono' }, color: '#484f58' },
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          border: { color: '#30363d' }
+        }
+      }
+    }
+  });
+
+  
+  function sekarang() {
+    return new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+
+ 
+  function updateKartu() {
+    const hot = parseFloat(lastSuhu) > SUHU_THRESHOLD;
+
+    document.getElementById('suhuVal').innerHTML = lastSuhu + '<span class="s-unit">°C</span>';
+    document.getElementById('humVal').innerHTML  = lastHumid + '<span class="s-unit">%</span>';
+    document.getElementById('suhuTime').textContent = 'Update: ' + sekarang();
+    document.getElementById('humTime').textContent  = 'Update: ' + sekarang();
+
+    const cardSuhu = document.getElementById('cardSuhu');
+    if (hot) cardSuhu.classList.add('hot');
+    else cardSuhu.classList.remove('hot');
+
+    const banner = document.getElementById('warningBanner');
+    if (hot) {
+      banner.classList.add('show');
+      document.getElementById('warningVal').textContent = lastSuhu;
+    } else {
+      banner.classList.remove('show');
+    }
+  }
+
+  
+  function updateGrafik() {
+    const hot = parseFloat(lastSuhu) > SUHU_THRESHOLD;
+    const time = sekarang();
+
+    labels.push(time);
+    dataSuhu.push(parseFloat(lastSuhu));
+    dataHumid.push(parseFloat(lastHumid));
+
+    if (labels.length > MAX_DATA) {
+      labels.shift(); dataSuhu.shift(); dataHumid.shift();
+    }
+
+    chartSuhu.data.datasets[0].borderColor = suhuColor(hot);
+    chartSuhu.data.datasets[0].backgroundColor = suhuBg(hot);
+    chartSuhu.data.datasets[0].pointBackgroundColor = suhuColor(hot);
+
+    chartSuhu.update();
+    chartHumid.update();
+  }
+
+ 
+  function updateTabel() {
+    const tbody = document.getElementById('tableBody');
+    const placeholder = tbody.querySelector('.no-data');
+    if (placeholder) placeholder.closest('tr').remove();
+
+    const hot = parseFloat(lastSuhu) > SUHU_THRESHOLD;
+    rowCount++;
+
+    const tr = document.createElement('tr');
+    if (hot) tr.classList.add('warn-row');
+
+    tr.innerHTML = `
+      <td>${rowCount}</td>
+      <td>${sekarang()}</td>
+      <td class="${hot ? 'hot' : ''}">${lastSuhu}${hot ? '<span class="badge-hot">PANAS</span>' : ''}</td>
+      <td>${lastHumid}</td>
+    `;
+    tbody.insertBefore(tr, tbody.firstChild);
+    while (tbody.rows.length > MAX_DATA) tbody.deleteRow(tbody.rows.length - 1);
+  }
+
+  
+  const badge  = document.getElementById('statusBadge');
+  const client = mqtt.connect(BROKER, {
+    clientId: 'web_' + Math.random().toString(16).slice(2, 8),
+    clean: true
+  });
+
+  client.on('connect', () => {
+    badge.textContent = 'Online';
+    badge.className   = 'status-badge status-online';
+    client.subscribe(TOPIC_S);
+    client.subscribe(TOPIC_H);
+    client.subscribe(TOPIC_C);
+  });
+  client.on('offline',   () => { badge.textContent = 'Offline';          badge.className = 'status-badge status-offline'; });
+  client.on('error',     () => { badge.textContent = 'Error';            badge.className = 'status-badge status-offline'; });
+  client.on('reconnect', () => { badge.textContent = 'Menghubungkan...'; badge.className = 'status-badge status-connecting'; });
+
+  client.on('message', (topic, payload) => {
+    const val = payload.toString();
+    if (topic === TOPIC_S) { lastSuhu  = val; gotSuhu  = true; updateKartu(); }
+    if (topic === TOPIC_H) { lastHumid = val; gotHumid = true; updateKartu(); }
+    if (gotSuhu && gotHumid) {
+      updateGrafik();
+      updateTabel();
+      gotSuhu  = false;
+      gotHumid = false;
+    }
+  });
+</script>
+</body>
+</html>
