@@ -46,7 +46,6 @@
       gap: 12px;
     }
 
-  
     .header {
       display: flex;
       align-items: center;
@@ -92,7 +91,6 @@
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
-   
     .warning-banner {
       display: none;
       background: var(--red-dim);
@@ -115,7 +113,6 @@
       80%{transform:translateX(3px)}
     }
 
-    
     .sensor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .sensor-card {
       background: var(--surface);
@@ -150,7 +147,6 @@
       margin-top: 10px;
     }
 
-   
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -180,7 +176,6 @@
     .badge-blue  { color: var(--blue);  border-color: var(--blue-dim);  background: var(--blue-dim); }
     .badge-teal  { color: var(--teal);  border-color: var(--teal-dim);  background: var(--teal-dim); }
 
-    
     .table-wrap { overflow-x: auto; max-height: 260px; overflow-y: auto; }
     .table-wrap::-webkit-scrollbar { width: 4px; }
     .table-wrap::-webkit-scrollbar-track { background: transparent; }
@@ -223,7 +218,6 @@
       vertical-align: middle;
     }
 
-    
     .relay-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -291,7 +285,6 @@
     }
     .btn-off:hover { background: #5a2420; }
 
-    
     @media (max-width: 520px) {
       body { padding: 12px 10px 32px; }
       .sensor-grid { grid-template-columns: 1fr; }
@@ -306,7 +299,6 @@
 <body>
 <div class="container">
 
-  
   <div class="header">
     <div class="header-left">
       <div class="header-icon">🌡️</div>
@@ -318,7 +310,6 @@
     <span class="status-badge status-connecting" id="statusBadge">Menghubungkan...</span>
   </div>
 
-  
   <div class="warning-banner" id="warningBanner">
     <div class="warning-icon">⚠️</div>
     <div class="warning-text">
@@ -326,7 +317,6 @@
     </div>
   </div>
 
- 
   <div class="sensor-grid">
     <div class="sensor-card" id="cardSuhu">
       <div class="s-label">🌡 Suhu</div>
@@ -340,7 +330,6 @@
     </div>
   </div>
 
-  
   <div class="card">
     <div class="card-header">
       <div class="card-title">🔌 Kontrol Relay / LED</div>
@@ -381,7 +370,6 @@
     </div>
   </div>
 
- 
   <div class="card">
     <div class="card-header">
       <div class="card-title">Grafik Suhu</div>
@@ -390,7 +378,6 @@
     <canvas id="chartSuhu" height="110"></canvas>
   </div>
 
-  
   <div class="card">
     <div class="card-header">
       <div class="card-title">Grafik Kelembaban</div>
@@ -399,7 +386,6 @@
     <canvas id="chartHumid" height="110"></canvas>
   </div>
 
-  
   <div class="card">
     <div class="card-header">
       <div class="card-title">Riwayat Data</div>
@@ -436,20 +422,19 @@
   let gotSuhu = false, gotHumid = false;
   let rowCount = 0;
 
-
   const relayState = [false, false, false, false];
 
- 
+  // ✅ LOGIKA RELAY SUDAH DIBALIK
   function relayOn(i) {
     relayState[i] = true;
     updateRelayUI(i);
-    client.publish(TOPIC_C, 'R' + (i + 1) + '_OFF');
+    client.publish(TOPIC_C, 'R' + (i + 1) + '_ON');
   }
 
   function relayOff(i) {
     relayState[i] = false;
     updateRelayUI(i);
-    client.publish(TOPIC_C, 'R' + (i + 1) + '_ON');
+    client.publish(TOPIC_C, 'R' + (i + 1) + '_OFF');
   }
 
   function updateRelayUI(i) {
@@ -458,7 +443,6 @@
     else card.classList.remove('active');
   }
 
-  
   function suhuColor(hot) {
     return hot ? '#f85149' : '#388bfd';
   }
@@ -502,7 +486,6 @@
     }
   });
 
- 
   const ctxHumid = document.getElementById('chartHumid').getContext('2d');
   const chartHumid = new Chart(ctxHumid, {
     type: 'line',
@@ -539,16 +522,21 @@
     }
   });
 
-  
   function sekarang() {
     return new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }
 
- 
   function updateKartu() {
     const hot = parseFloat(lastSuhu) > SUHU_THRESHOLD;
 
-    document.getElementById('suhuVal').innerHTML = lastSuhu + '<span class="s-unit">°C</span>';
+    // ✅ WARNA TEKS SUHU BERDASARKAN RENTANG SUHU
+    const suhu = parseFloat(lastSuhu);
+    let warnaSuhu = '#388bfd';
+    if (suhu >= 20 && suhu < 25)      warnaSuhu = '#3fb950'; // hijau
+    else if (suhu >= 25 && suhu < 30) warnaSuhu = '#d29922'; // kuning
+    else if (suhu >= 30)              warnaSuhu = '#f85149'; // merah
+
+    document.getElementById('suhuVal').innerHTML = '<span style="color:' + warnaSuhu + '">' + lastSuhu + '<span class="s-unit">°C</span></span>';
     document.getElementById('humVal').innerHTML  = lastHumid + '<span class="s-unit">%</span>';
     document.getElementById('suhuTime').textContent = 'Update: ' + sekarang();
     document.getElementById('humTime').textContent  = 'Update: ' + sekarang();
@@ -566,7 +554,6 @@
     }
   }
 
-  
   function updateGrafik() {
     const hot = parseFloat(lastSuhu) > SUHU_THRESHOLD;
     const time = sekarang();
@@ -587,7 +574,6 @@
     chartHumid.update();
   }
 
- 
   function updateTabel() {
     const tbody = document.getElementById('tableBody');
     const placeholder = tbody.querySelector('.no-data');
@@ -609,7 +595,6 @@
     while (tbody.rows.length > MAX_DATA) tbody.deleteRow(tbody.rows.length - 1);
   }
 
-  
   const badge  = document.getElementById('statusBadge');
   const client = mqtt.connect(BROKER, {
     clientId: 'web_' + Math.random().toString(16).slice(2, 8),
