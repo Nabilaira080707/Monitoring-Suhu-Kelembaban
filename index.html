@@ -81,11 +81,11 @@
       border-radius: 50%;
       display: inline-block;
     }
-    .status-online    { color: var(--teal);  border-color: var(--teal);  background: var(--teal-dim); }
+    .status-online     { color: var(--teal);   border-color: var(--teal);   background: var(--teal-dim); }
     .status-online::before { background: var(--teal); box-shadow: 0 0 6px var(--teal); animation: pulse 2s infinite; }
-    .status-offline   { color: var(--red);   border-color: var(--red);   background: var(--red-dim); }
+    .status-offline    { color: var(--red);    border-color: var(--red);    background: var(--red-dim); }
     .status-offline::before { background: var(--red); }
-    .status-connecting{ color: var(--yellow);border-color: var(--yellow);background: var(--yellow-dim); }
+    .status-connecting { color: var(--yellow); border-color: var(--yellow); background: var(--yellow-dim); }
     .status-connecting::before { background: var(--yellow); animation: blink 1s infinite; }
 
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
@@ -123,29 +123,72 @@
     }
     .sensor-card.hot { border-color: var(--red); background: var(--red-dim); }
     .sensor-card .s-label {
-      font-size: 11px;
-      font-family: var(--mono);
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 10px;
+      font-size: 11px; font-family: var(--mono); color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;
     }
     .sensor-card .s-value {
-      font-size: 54px;
-      font-family: var(--mono);
-      font-weight: 700;
-      color: var(--blue);
-      line-height: 1;
-      transition: color 0.3s;
+      font-size: 54px; font-family: var(--mono); font-weight: 700;
+      color: var(--blue); line-height: 1; transition: color 0.3s;
     }
-    .sensor-card.hot .s-value { color: var(--red); }
     .sensor-card .s-unit { font-size: 20px; font-weight: 400; }
     .sensor-card .s-time {
-      font-size: 10px;
-      color: var(--text-faint);
-      font-family: var(--mono);
-      margin-top: 10px;
+      font-size: 10px; color: var(--text-faint); font-family: var(--mono); margin-top: 10px;
     }
+
+    /* MODE BAR */
+    .mode-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 20px;
+      gap: 12px;
+    }
+    .mode-info { display: flex; flex-direction: column; gap: 3px; }
+    .mode-info-title { font-size: 11px; font-family: var(--mono); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .mode-desc { font-size: 11px; color: var(--text-faint); font-family: var(--mono); }
+    .mode-btn {
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--blue);
+      background: var(--blue-dim);
+      color: var(--blue);
+      font-size: 12px;
+      font-family: var(--mono);
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .mode-btn:active { transform: scale(0.95); }
+
+    /* AUTO LEGEND */
+    .auto-legend {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 20px;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .auto-legend.show { display: flex; }
+    .legend-title { font-size: 10px; font-family: var(--mono); color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; width: 100%; margin-bottom: 2px; }
+    .legend-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 11px; font-family: var(--mono); color: var(--text-muted);
+    }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .legend-dot.blue   { background: var(--blue);   box-shadow: 0 0 5px var(--blue); }
+    .legend-dot.green  { background: var(--teal);   box-shadow: 0 0 5px var(--teal); }
+    .legend-dot.yellow { background: var(--yellow); box-shadow: 0 0 5px var(--yellow); }
+    .legend-dot.red    { background: var(--red);    box-shadow: 0 0 5px var(--red); }
 
     .card {
       background: var(--surface);
@@ -154,27 +197,12 @@
       padding: 16px 20px 14px;
     }
     .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
     }
-    .card-title {
-      font-size: 12px;
-      font-family: var(--mono);
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-    .card-badge {
-      font-size: 10px;
-      font-family: var(--mono);
-      padding: 2px 8px;
-      border-radius: 4px;
-      border: 1px solid;
-    }
-    .badge-blue  { color: var(--blue);  border-color: var(--blue-dim);  background: var(--blue-dim); }
-    .badge-teal  { color: var(--teal);  border-color: var(--teal-dim);  background: var(--teal-dim); }
+    .card-title { font-size: 12px; font-family: var(--mono); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .card-badge { font-size: 10px; font-family: var(--mono); padding: 2px 8px; border-radius: 4px; border: 1px solid; }
+    .badge-blue { color: var(--blue); border-color: var(--blue-dim); background: var(--blue-dim); }
+    .badge-teal { color: var(--teal); border-color: var(--teal-dim); background: var(--teal-dim); }
 
     .table-wrap { overflow-x: auto; max-height: 260px; overflow-y: auto; }
     .table-wrap::-webkit-scrollbar { width: 4px; }
@@ -183,107 +211,73 @@
 
     table { width: 100%; border-collapse: collapse; font-size: 12px; }
     thead th {
-      text-align: left;
-      padding: 8px 12px;
-      font-size: 10px;
-      font-family: var(--mono);
-      font-weight: 700;
-      color: var(--text-faint);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      background: var(--surface);
+      text-align: left; padding: 8px 12px; font-size: 10px; font-family: var(--mono);
+      font-weight: 700; color: var(--text-faint); text-transform: uppercase;
+      letter-spacing: 0.06em; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; background: var(--surface);
     }
     tbody tr { border-bottom: 1px solid #1c2128; transition: background 0.15s; }
     tbody tr:last-child { border-bottom: none; }
     tbody td { padding: 9px 12px; color: var(--text-muted); font-family: var(--mono); font-size: 12px; }
     tbody td:first-child { color: var(--text-faint); }
-    tbody td.hot { color: var(--red); }
+    tbody td.c-blue   { color: var(--blue); }
+    tbody td.c-green  { color: var(--teal); }
+    tbody td.c-yellow { color: var(--yellow); }
+    tbody td.c-red    { color: var(--red); }
     tbody tr:hover { background: var(--surface2); }
     tbody tr.warn-row td { background: rgba(248,81,73,0.06); }
 
     .no-data { text-align: center; color: var(--text-faint); padding: 24px; font-size: 12px; font-family: var(--mono); }
 
-    .badge-hot {
-      display: inline-block;
-      font-size: 9px;
-      background: var(--red-dim);
-      color: var(--red);
-      border: 1px solid var(--red);
-      border-radius: 4px;
-      padding: 1px 5px;
-      margin-left: 5px;
-      vertical-align: middle;
+    .badge-temp {
+      display: inline-block; font-size: 9px; border-radius: 4px;
+      padding: 1px 5px; margin-left: 5px; vertical-align: middle; border: 1px solid;
     }
+    .bt-blue   { background: var(--blue-dim);   color: var(--blue);   border-color: var(--blue); }
+    .bt-green  { background: var(--teal-dim);   color: var(--teal);   border-color: var(--teal); }
+    .bt-yellow { background: var(--yellow-dim); color: var(--yellow); border-color: var(--yellow); }
+    .bt-red    { background: var(--red-dim);    color: var(--red);    border-color: var(--red); }
 
-    .relay-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
+    /* RELAY */
+    .relay-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
     .relay-card {
-      background: var(--surface);
+      background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 14px 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      transition: border-color 0.3s;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      transition: border-color 0.3s, background 0.3s;
     }
-    .relay-card.active {
-      border-color: var(--teal);
-      background: var(--teal-dim);
-    }
-    .relay-label {
-      font-size: 11px;
-      font-family: var(--mono);
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
+    .relay-card.active-blue   { border-color: var(--blue);   background: var(--blue-dim); }
+    .relay-card.active-green  { border-color: var(--teal);   background: var(--teal-dim); }
+    .relay-card.active-yellow { border-color: var(--yellow); background: var(--yellow-dim); }
+    .relay-card.active-red    { border-color: var(--red);    background: var(--red-dim); }
+
+    .relay-label     { font-size: 11px; font-family: var(--mono); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .relay-led-label { font-size: 10px; font-family: var(--mono); color: var(--text-faint); }
+
     .relay-indicator {
-      width: 14px; height: 14px;
-      border-radius: 50%;
+      width: 16px; height: 16px; border-radius: 50%;
       background: var(--text-faint);
       transition: background 0.3s, box-shadow 0.3s;
     }
-    .relay-card.active .relay-indicator {
-      background: var(--teal);
-      box-shadow: 0 0 8px var(--teal);
-    }
-    .relay-btn-group {
-      display: flex;
-      gap: 6px;
-      width: 100%;
-    }
+    .relay-card.active-blue   .relay-indicator { background: var(--blue);   box-shadow: 0 0 10px var(--blue); }
+    .relay-card.active-green  .relay-indicator { background: var(--teal);   box-shadow: 0 0 10px var(--teal); }
+    .relay-card.active-yellow .relay-indicator { background: var(--yellow); box-shadow: 0 0 10px var(--yellow); }
+    .relay-card.active-red    .relay-indicator { background: var(--red);    box-shadow: 0 0 10px var(--red); }
+
+    .relay-btn-group { display: flex; gap: 6px; width: 100%; }
     .relay-btn {
-      flex: 1;
-      padding: 6px 0;
-      border-radius: 6px;
-      border: 1px solid;
-      font-size: 11px;
-      font-family: var(--mono);
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s;
+      flex: 1; padding: 6px 0; border-radius: 6px; border: 1px solid;
+      font-size: 11px; font-family: var(--mono); font-weight: 700;
+      cursor: pointer; transition: opacity 0.2s, transform 0.1s;
     }
     .relay-btn:active { transform: scale(0.95); }
-    .btn-on {
-      background: var(--teal-dim);
-      border-color: var(--teal);
-      color: var(--teal);
-    }
-    .btn-on:hover { background: #235c30; }
-    .btn-off {
-      background: var(--red-dim);
-      border-color: var(--red);
-      color: var(--red);
-    }
-    .btn-off:hover { background: #5a2420; }
+    .relay-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .btn-on  { background: var(--teal-dim);  border-color: var(--teal);  color: var(--teal); }
+    .btn-on:hover:not(:disabled)  { background: #235c30; }
+    .btn-off { background: var(--red-dim);   border-color: var(--red);   color: var(--red); }
+    .btn-off:hover:not(:disabled) { background: #5a2420; }
 
     @media (max-width: 520px) {
       body { padding: 12px 10px 32px; }
@@ -293,6 +287,7 @@
       .header p { font-size: 10px; }
       .status-badge { font-size: 10px; padding: 3px 8px; }
       .relay-grid { grid-template-columns: repeat(2, 1fr); }
+      .mode-bar { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
@@ -317,6 +312,24 @@
     </div>
   </div>
 
+  <!-- MODE BAR -->
+  <div class="mode-bar">
+    <div class="mode-info">
+      <div class="mode-info-title">⚙️ Mode Kontrol</div>
+      <div class="mode-desc" id="modeDesc">Kontrol relay secara manual</div>
+    </div>
+    <button class="mode-btn" id="modeBtn">🖐 Mode: MANUAL</button>
+  </div>
+
+  <!-- AUTO LEGEND -->
+  <div class="auto-legend" id="autoLegend">
+    <div class="legend-title">Aturan LED Otomatis</div>
+    <div class="legend-item"><div class="legend-dot blue"></div>Relay 1 (Biru): &lt; 20°C</div>
+    <div class="legend-item"><div class="legend-dot green"></div>Relay 2 (Hijau): 20–25°C</div>
+    <div class="legend-item"><div class="legend-dot yellow"></div>Relay 3 (Kuning): 25–30°C</div>
+    <div class="legend-item"><div class="legend-dot red"></div>Relay 4 (Merah): ≥ 30°C</div>
+  </div>
+
   <div class="sensor-grid">
     <div class="sensor-card" id="cardSuhu">
       <div class="s-label">🌡 Suhu</div>
@@ -337,6 +350,7 @@
     <div class="relay-grid">
       <div class="relay-card" id="relayCard0">
         <div class="relay-label">Relay 1</div>
+        <div class="relay-led-label">🔵 LED Biru</div>
         <div class="relay-indicator" id="relayInd0"></div>
         <div class="relay-btn-group">
           <button class="relay-btn btn-on"  onclick="relayOn(0)">ON</button>
@@ -345,6 +359,7 @@
       </div>
       <div class="relay-card" id="relayCard1">
         <div class="relay-label">Relay 2</div>
+        <div class="relay-led-label">🟢 LED Hijau</div>
         <div class="relay-indicator" id="relayInd1"></div>
         <div class="relay-btn-group">
           <button class="relay-btn btn-on"  onclick="relayOn(1)">ON</button>
@@ -353,6 +368,7 @@
       </div>
       <div class="relay-card" id="relayCard2">
         <div class="relay-label">Relay 3</div>
+        <div class="relay-led-label">🟡 LED Kuning</div>
         <div class="relay-indicator" id="relayInd2"></div>
         <div class="relay-btn-group">
           <button class="relay-btn btn-on"  onclick="relayOn(2)">ON</button>
@@ -361,6 +377,7 @@
       </div>
       <div class="relay-card" id="relayCard3">
         <div class="relay-label">Relay 4</div>
+        <div class="relay-led-label">🔴 LED Merah</div>
         <div class="relay-indicator" id="relayInd3"></div>
         <div class="relay-btn-group">
           <button class="relay-btn btn-on"  onclick="relayOn(3)">ON</button>
@@ -410,12 +427,17 @@
 </div>
 
 <script>
-  const BROKER  = 'wss://broker.hivemq.com:8884/mqtt';
-  const TOPIC_S = 'smk/iot/sensorsuhu2';
-  const TOPIC_H = 'smk/iot/sensorkelembaban2';
-  const TOPIC_C = 'smk/iot/control2';
-  const MAX_DATA = 20;
-  const SUHU_THRESHOLD = 30;
+  const BROKER    = 'wss://broker.hivemq.com:8884/mqtt';
+  const TOPIC_S   = 'smk/iot/sensorsuhu2';
+  const TOPIC_H   = 'smk/iot/sensorkelembaban2';
+  const TOPIC_C   = 'smk/iot/control2';
+  const TOPIC_STA = 'smk/iot/relaystatus2';
+  const MAX_DATA  = 20;
+
+  // Batas suhu
+  const T1 = 20; // < 20  → biru
+  const T2 = 25; // 20-25 → hijau
+  const T3 = 30; // 25-30 → kuning, >=30 → merah
 
   const labels = [], dataSuhu = [], dataHumid = [];
   let lastSuhu = '--', lastHumid = '--';
@@ -423,65 +445,140 @@
   let rowCount = 0;
 
   const relayState = [false, false, false, false];
+  // warna tiap relay sesuai urutannya
+  const relayColor = ['blue', 'green', 'yellow', 'red'];
 
-  // ✅ LOGIKA RELAY SUDAH DIBALIK
+  let mode = 'manual';
+
+  // ── MODE ──────────────────────────────────────────────
+  const modeBtn    = document.getElementById('modeBtn');
+  const modeDesc   = document.getElementById('modeDesc');
+  const autoLegend = document.getElementById('autoLegend');
+
+  modeBtn.addEventListener('click', () => {
+    mode = (mode === 'manual') ? 'auto' : 'manual';
+    updateModeUI();
+    publishStatus();
+    if (mode === 'auto') cekAutoRelay();
+  });
+
+  function updateModeUI() {
+    if (mode === 'auto') {
+      modeBtn.textContent       = '🤖 Mode: OTOMATIS';
+      modeBtn.style.background  = 'var(--teal-dim)';
+      modeBtn.style.borderColor = 'var(--teal)';
+      modeBtn.style.color       = 'var(--teal)';
+      modeDesc.textContent      = 'LED menyala otomatis sesuai kondisi suhu';
+      autoLegend.classList.add('show');
+      setAllRelayBtnsDisabled(true);
+    } else {
+      modeBtn.textContent       = '🖐 Mode: MANUAL';
+      modeBtn.style.background  = 'var(--blue-dim)';
+      modeBtn.style.borderColor = 'var(--blue)';
+      modeBtn.style.color       = 'var(--blue)';
+      modeDesc.textContent      = 'Kontrol relay secara manual';
+      autoLegend.classList.remove('show');
+      setAllRelayBtnsDisabled(false);
+    }
+  }
+
+  function setAllRelayBtnsDisabled(disabled) {
+    document.querySelectorAll('.relay-btn').forEach(b => b.disabled = disabled);
+  }
+
+  // ── AUTO RELAY ────────────────────────────────────────
+  // Hanya 1 relay yang menyala, sisanya mati
+  // Relay 0 (biru)   : suhu < 20
+  // Relay 1 (hijau)  : 20 <= suhu < 25
+  // Relay 2 (kuning) : 25 <= suhu < 30
+  // Relay 3 (merah)  : suhu >= 30
+  function getTargetRelay(suhu) {
+    if (suhu < T1)           return 0;
+    if (suhu >= T1 && suhu < T2) return 1;
+    if (suhu >= T2 && suhu < T3) return 2;
+    return 3;
+  }
+
+  function cekAutoRelay() {
+    if (mode !== 'auto') return;
+    const suhu = parseFloat(lastSuhu);
+    if (isNaN(suhu)) return;
+
+    const target = getTargetRelay(suhu);
+    let changed = false;
+
+    for (let i = 0; i < 4; i++) {
+      const should = (i === target);
+      if (relayState[i] !== should) {
+        relayState[i] = should;
+        const cmd = 'R' + (i + 1) + (should ? '_ON' : '_OFF');
+        if (client && client.connected) client.publish(TOPIC_C, cmd);
+        updateRelayUI(i);
+        changed = true;
+      }
+    }
+    if (changed) publishStatus();
+  }
+
+  // ── RELAY MANUAL ─────────────────────────────────────
   function relayOn(i) {
+    if (mode === 'auto') return;
     relayState[i] = true;
+    if (client && client.connected) client.publish(TOPIC_C, 'R' + (i + 1) + '_ON');
     updateRelayUI(i);
-    client.publish(TOPIC_C, 'R' + (i + 1) + '_ON');
+    publishStatus();
   }
 
   function relayOff(i) {
+    if (mode === 'auto') return;
     relayState[i] = false;
+    if (client && client.connected) client.publish(TOPIC_C, 'R' + (i + 1) + '_OFF');
     updateRelayUI(i);
-    client.publish(TOPIC_C, 'R' + (i + 1) + '_OFF');
+    publishStatus();
   }
 
   function updateRelayUI(i) {
     const card = document.getElementById('relayCard' + i);
-    if (relayState[i]) card.classList.add('active');
-    else card.classList.remove('active');
+    card.classList.remove('active-blue', 'active-green', 'active-yellow', 'active-red');
+    if (relayState[i]) card.classList.add('active-' + relayColor[i]);
   }
 
-  function suhuColor(hot) {
-    return hot ? '#f85149' : '#388bfd';
-  }
-  function suhuBg(hot) {
-    return hot ? 'rgba(248,81,73,0.10)' : 'rgba(56,139,253,0.08)';
+  function publishStatus() {
+    if (client && client.connected) {
+      client.publish(TOPIC_STA, JSON.stringify({
+        relay: relayState,
+        mode:  mode
+      }), { retain: true });
+    }
   }
 
+  // ── WARNA SUHU ────────────────────────────────────────
+  function getWarnaSuhu(suhu) {
+    if (suhu < T1)                   return '#388bfd'; // biru
+    if (suhu >= T1 && suhu < T2)     return '#3fb950'; // hijau
+    if (suhu >= T2 && suhu < T3)     return '#d29922'; // kuning
+    return '#f85149';                                  // merah
+  }
+
+  // ── CHART ─────────────────────────────────────────────
   const ctxSuhu = document.getElementById('chartSuhu').getContext('2d');
   const chartSuhu = new Chart(ctxSuhu, {
     type: 'line',
     data: {
       labels,
       datasets: [{
-        label: 'Suhu (°C)',
-        data: dataSuhu,
-        borderColor: '#388bfd',
-        backgroundColor: 'rgba(56,139,253,0.08)',
-        tension: 0.4,
-        pointRadius: 3,
-        fill: true,
-        borderWidth: 2,
+        label: 'Suhu (°C)', data: dataSuhu,
+        borderColor: '#388bfd', backgroundColor: 'rgba(56,139,253,0.08)',
+        tension: 0.4, pointRadius: 3, fill: true, borderWidth: 2,
         pointBackgroundColor: '#388bfd'
       }]
     },
     options: {
-      responsive: true,
-      animation: { duration: 400 },
+      responsive: true, animation: { duration: 400 },
       plugins: { legend: { display: false } },
       scales: {
-        x: {
-          ticks: { font: { size: 9, family: 'Space Mono' }, color: '#484f58', maxRotation: 0 },
-          grid: { color: 'rgba(255,255,255,0.04)' },
-          border: { color: '#30363d' }
-        },
-        y: {
-          ticks: { font: { size: 9, family: 'Space Mono' }, color: '#484f58' },
-          grid: { color: 'rgba(255,255,255,0.04)' },
-          border: { color: '#30363d' }
-        }
+        x: { ticks: { font: { size: 9, family: 'Space Mono' }, color: '#484f58', maxRotation: 0 }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { color: '#30363d' } },
+        y: { ticks: { font: { size: 9, family: 'Space Mono' }, color: '#484f58' }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { color: '#30363d' } }
       }
     }
   });
@@ -492,109 +589,86 @@
     data: {
       labels,
       datasets: [{
-        label: 'Kelembaban (%)',
-        data: dataHumid,
-        borderColor: '#3fb950',
-        backgroundColor: 'rgba(63,185,80,0.08)',
-        tension: 0.4,
-        pointRadius: 3,
-        fill: true,
-        borderWidth: 2,
+        label: 'Kelembaban (%)', data: dataHumid,
+        borderColor: '#3fb950', backgroundColor: 'rgba(63,185,80,0.08)',
+        tension: 0.4, pointRadius: 3, fill: true, borderWidth: 2,
         pointBackgroundColor: '#3fb950'
       }]
     },
     options: {
-      responsive: true,
-      animation: { duration: 400 },
+      responsive: true, animation: { duration: 400 },
       plugins: { legend: { display: false } },
       scales: {
-        x: {
-          ticks: { font: { size: 9, family: 'Space Mono' }, color: '#484f58', maxRotation: 0 },
-          grid: { color: 'rgba(255,255,255,0.04)' },
-          border: { color: '#30363d' }
-        },
-        y: {
-          ticks: { font: { size: 9, family: 'Space Mono' }, color: '#484f58' },
-          grid: { color: 'rgba(255,255,255,0.04)' },
-          border: { color: '#30363d' }
-        }
+        x: { ticks: { font: { size: 9, family: 'Space Mono' }, color: '#484f58', maxRotation: 0 }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { color: '#30363d' } },
+        y: { ticks: { font: { size: 9, family: 'Space Mono' }, color: '#484f58' }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { color: '#30363d' } }
       }
     }
   });
 
+  // ── HELPERS ───────────────────────────────────────────
   function sekarang() {
     return new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }
 
   function updateKartu() {
-    const hot = parseFloat(lastSuhu) > SUHU_THRESHOLD;
+    const suhu  = parseFloat(lastSuhu);
+    const hot   = suhu >= T3;
+    const warna = getWarnaSuhu(suhu);
 
-    // ✅ WARNA TEKS SUHU BERDASARKAN RENTANG SUHU
-    const suhu = parseFloat(lastSuhu);
-    let warnaSuhu = '#388bfd';
-    if (suhu >= 20 && suhu < 25)      warnaSuhu = '#3fb950'; // hijau
-    else if (suhu >= 25 && suhu < 30) warnaSuhu = '#d29922'; // kuning
-    else if (suhu >= 30)              warnaSuhu = '#f85149'; // merah
-
-    document.getElementById('suhuVal').innerHTML = '<span style="color:' + warnaSuhu + '">' + lastSuhu + '<span class="s-unit">°C</span></span>';
+    document.getElementById('suhuVal').innerHTML =
+      '<span style="color:' + warna + '">' + lastSuhu + '<span class="s-unit">°C</span></span>';
     document.getElementById('humVal').innerHTML  = lastHumid + '<span class="s-unit">%</span>';
     document.getElementById('suhuTime').textContent = 'Update: ' + sekarang();
     document.getElementById('humTime').textContent  = 'Update: ' + sekarang();
 
     const cardSuhu = document.getElementById('cardSuhu');
-    if (hot) cardSuhu.classList.add('hot');
-    else cardSuhu.classList.remove('hot');
+    if (hot) cardSuhu.classList.add('hot'); else cardSuhu.classList.remove('hot');
 
     const banner = document.getElementById('warningBanner');
-    if (hot) {
-      banner.classList.add('show');
-      document.getElementById('warningVal').textContent = lastSuhu;
-    } else {
-      banner.classList.remove('show');
-    }
+    if (hot) { banner.classList.add('show'); document.getElementById('warningVal').textContent = lastSuhu; }
+    else banner.classList.remove('show');
   }
 
   function updateGrafik() {
-    const hot = parseFloat(lastSuhu) > SUHU_THRESHOLD;
-    const time = sekarang();
-
-    labels.push(time);
-    dataSuhu.push(parseFloat(lastSuhu));
-    dataHumid.push(parseFloat(lastHumid));
-
-    if (labels.length > MAX_DATA) {
-      labels.shift(); dataSuhu.shift(); dataHumid.shift();
-    }
-
-    chartSuhu.data.datasets[0].borderColor = suhuColor(hot);
-    chartSuhu.data.datasets[0].backgroundColor = suhuBg(hot);
-    chartSuhu.data.datasets[0].pointBackgroundColor = suhuColor(hot);
-
+    const suhu = parseFloat(lastSuhu);
+    const hot  = suhu >= T3;
+    labels.push(sekarang()); dataSuhu.push(suhu); dataHumid.push(parseFloat(lastHumid));
+    if (labels.length > MAX_DATA) { labels.shift(); dataSuhu.shift(); dataHumid.shift(); }
+    const sc = hot ? '#f85149' : '#388bfd';
+    const sb = hot ? 'rgba(248,81,73,0.10)' : 'rgba(56,139,253,0.08)';
+    chartSuhu.data.datasets[0].borderColor          = sc;
+    chartSuhu.data.datasets[0].backgroundColor      = sb;
+    chartSuhu.data.datasets[0].pointBackgroundColor = sc;
     chartSuhu.update();
     chartHumid.update();
   }
 
   function updateTabel() {
     const tbody = document.getElementById('tableBody');
-    const placeholder = tbody.querySelector('.no-data');
-    if (placeholder) placeholder.closest('tr').remove();
+    const ph = tbody.querySelector('.no-data');
+    if (ph) ph.closest('tr').remove();
 
-    const hot = parseFloat(lastSuhu) > SUHU_THRESHOLD;
+    const suhu = parseFloat(lastSuhu);
+    let tdClass = '', badge = '';
+    if (suhu < T1)                   { tdClass = 'c-blue';   badge = '<span class="badge-temp bt-blue">DINGIN</span>'; }
+    else if (suhu >= T1 && suhu < T2){ tdClass = 'c-green';  badge = '<span class="badge-temp bt-green">SEJUK</span>'; }
+    else if (suhu >= T2 && suhu < T3){ tdClass = 'c-yellow'; badge = '<span class="badge-temp bt-yellow">HANGAT</span>'; }
+    else                             { tdClass = 'c-red';    badge = '<span class="badge-temp bt-red">PANAS</span>'; }
+
     rowCount++;
-
     const tr = document.createElement('tr');
-    if (hot) tr.classList.add('warn-row');
-
+    if (suhu >= T3) tr.classList.add('warn-row');
     tr.innerHTML = `
       <td>${rowCount}</td>
       <td>${sekarang()}</td>
-      <td class="${hot ? 'hot' : ''}">${lastSuhu}${hot ? '<span class="badge-hot">PANAS</span>' : ''}</td>
+      <td class="${tdClass}">${lastSuhu}${badge}</td>
       <td>${lastHumid}</td>
     `;
     tbody.insertBefore(tr, tbody.firstChild);
     while (tbody.rows.length > MAX_DATA) tbody.deleteRow(tbody.rows.length - 1);
   }
 
+  // ── MQTT ──────────────────────────────────────────────
   const badge  = document.getElementById('statusBadge');
   const client = mqtt.connect(BROKER, {
     clientId: 'web_' + Math.random().toString(16).slice(2, 8),
@@ -607,6 +681,7 @@
     client.subscribe(TOPIC_S);
     client.subscribe(TOPIC_H);
     client.subscribe(TOPIC_C);
+    client.subscribe(TOPIC_STA);
   });
   client.on('offline',   () => { badge.textContent = 'Offline';          badge.className = 'status-badge status-offline'; });
   client.on('error',     () => { badge.textContent = 'Error';            badge.className = 'status-badge status-offline'; });
@@ -614,13 +689,30 @@
 
   client.on('message', (topic, payload) => {
     const val = payload.toString();
+
     if (topic === TOPIC_S) { lastSuhu  = val; gotSuhu  = true; updateKartu(); }
     if (topic === TOPIC_H) { lastHumid = val; gotHumid = true; updateKartu(); }
+
     if (gotSuhu && gotHumid) {
       updateGrafik();
       updateTabel();
       gotSuhu  = false;
       gotHumid = false;
+      cekAutoRelay();
+    }
+
+    // ── SYNC HP ↔ Laptop ──
+    if (topic === TOPIC_STA) {
+      try {
+        const data = JSON.parse(val);
+        if (Array.isArray(data.relay)) {
+          data.relay.forEach((st, i) => { relayState[i] = st; updateRelayUI(i); });
+        }
+        if (data.mode && data.mode !== mode) {
+          mode = data.mode;
+          updateModeUI();
+        }
+      } catch(e) {}
     }
   });
 </script>
